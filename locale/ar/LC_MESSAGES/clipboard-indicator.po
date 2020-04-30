@@ -1,0 +1,126 @@
+# Catalan translation for gnome-shell-extension-clipboard-indicator.
+# Copyright (C) 2018 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-shell-extension-clipboard-indicator package.
+# Adolfo Jayme Barrientos <fitojb@ubuntu.com>, 2018.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-shell-extension-clipboard-indicator\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-10-11 13:17+0300\n"
+"PO-Revision-Date: 2018-03-10 10:10-0600\n"
+"Last-Translator: Ahmed Ayman <ahmedayman055g@gmail.com>\n"
+"Language-Team: \n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.0.6\n"
+
+#: extension.js:81
+msgid "Text will be here"
+msgstr "النص سيكون هنا"
+
+#: extension.js:123
+msgid "Type here to search..."
+msgstr "اكتب هنا للبحث"
+
+#: extension.js:190
+msgid "Private mode"
+msgstr "الوضع السري"
+
+#: extension.js:197 prefs.js:106
+msgid "Clear history"
+msgstr "محو السجلات"
+
+#: extension.js:202
+msgid "Settings"
+msgstr "ضبط"
+
+#: extension.js:349
+msgid "Clipboard history cleared"
+msgstr "تم ازالة سجلات الحافظة"
+
+#: extension.js:467
+msgid "Copied to clipboard"
+msgstr "تم النسخ في الحافظة"
+
+#: extension.js:468
+msgid "Cancel"
+msgstr ""
+
+#: prefs.js:104
+msgid "Toggle the menu"
+msgstr "بدل حالة القائمة"
+
+#: prefs.js:108
+msgid "Previous entry"
+msgstr "المدخل السابق"
+
+#: prefs.js:110
+msgid "Next entry"
+msgstr "المدخل التالي"
+
+#: prefs.js:123
+msgid "History Size"
+msgstr "عدد العناصر في السجل "
+
+#: prefs.js:128
+msgid "Refresh Interval (ms)"
+msgstr "فترة الريفريش بالمللي ثانية"
+
+#: prefs.js:133
+msgid "Preview Size (characters)"
+msgstr "عدد الاحرف في المراجعه"
+
+#: prefs.js:138
+msgid "Max cache file size (kb)"
+msgstr "اقصي حجم للكاش فايل بالكيلوبايت"
+
+#: prefs.js:143
+msgid "Cache only favorites"
+msgstr ""
+
+#: prefs.js:148
+msgid "Show notification on copy"
+msgstr "اظهار الاشعارات عند النسخ"
+
+#: prefs.js:153
+msgid "Move item to the top after selection"
+msgstr ""
+
+#: prefs.js:158
+msgid "Keyboard shortcuts"
+msgstr "اختصارات الكيبورد"
+
+#: prefs.js:163
+msgid "Number of characters in top bar"
+msgstr "عدد الاحرف في الشريط العلوي"
+
+#: prefs.js:168
+msgid "What to show in top bar"
+msgstr "ما سيظهر في الشريط العلوي"
+
+#: prefs.js:173
+msgid "Remove whitespace around text"
+msgstr ""
+
+#: prefs.js:178
+msgid "Enable Deletion"
+msgstr ""
+
+#: prefs.js:225
+msgid "Icon"
+msgstr "أيقونة"
+
+#: prefs.js:226
+msgid "Clipboard Content"
+msgstr "محتوي الحافظة"
+
+#: prefs.js:227
+msgid "Both"
+msgstr "كلاهما"
+
+#~ msgid "Disable cache file"
+#~ msgstr "الغاء الكاش في فايل"
