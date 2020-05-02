@@ -1,17 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5a2a0e2a-f399-4be4-9283-66ecb6f75c9f" name="Default Changelist" comment="" />
+    <list default="true" id="5a2a0e2a-f399-4be4-9283-66ecb6f75c9f" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/extension.js" beforeDir="false" afterPath="$PROJECT_DIR$/extension.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stylesheet.css" beforeDir="false" afterPath="$PROJECT_DIR$/stylesheet.css" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1bGyTHAf2UVIkv356Fp41etqnqU" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../text-translator@pitcer.pl" />
+    <property name="nodejs_package_manager_path" value="npm" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -36,10 +45,51 @@
       <option name="presentableId" value="Default" />
       <updated>1588272731427</updated>
       <workItem from="1588272737510" duration="1844000" />
+      <workItem from="1588288096865" duration="241000" />
+      <workItem from="1588288399336" duration="53000" />
+      <workItem from="1588326766923" duration="2651000" />
+      <workItem from="1588330554347" duration="30000" />
+      <workItem from="1588330938236" duration="945000" />
+      <workItem from="1588409933522" duration="214000" />
+      <workItem from="1588410208041" duration="251000" />
+      <workItem from="1588410513681" duration="75000" />
+      <workItem from="1588410672525" duration="131000" />
+      <workItem from="1588412976982" duration="21000" />
+      <workItem from="1588413065283" duration="283000" />
+      <workItem from="1588413899511" duration="718000" />
+      <workItem from="1588414681356" duration="266000" />
+      <workItem from="1588415099726" duration="849000" />
+      <workItem from="1588416045184" duration="295000" />
+      <workItem from="1588416407470" duration="9000" />
+      <workItem from="1588416427090" duration="231000" />
+      <workItem from="1588417293122" duration="500000" />
+      <workItem from="1588417851904" duration="121000" />
+      <workItem from="1588418020974" duration="182000" />
+      <workItem from="1588418262680" duration="27000" />
+      <workItem from="1588418376708" duration="502000" />
+      <workItem from="1588418934554" duration="71000" />
+      <workItem from="1588459522977" duration="195000" />
+      <workItem from="1588459777708" duration="24000" />
+      <workItem from="1588462756287" duration="189000" />
+      <workItem from="1588463033968" duration="135000" />
+      <workItem from="1588463335383" duration="213000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>

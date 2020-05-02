@@ -19,3 +19,8 @@
 .ci-history-menu-section {
     max-height:450px;
 }
+
+.entry{
+    width: 100%;
+    border-radius: 15px;
+}

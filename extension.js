@@ -5,6 +5,7 @@ const Mainloop   = imports.mainloop;
 const Meta       = imports.gi.Meta;
 const Shell      = imports.gi.Shell;
 const St         = imports.gi.St;
+const Pango      = imports.gi.Pango;
 const PolicyType = imports.gi.Gtk.PolicyType;
 const Util       = imports.misc.util;
 const MessageTray = imports.ui.messageTray;
@@ -84,7 +85,7 @@ const TranslateIndicator = Lang.Class({
             y_align: Clutter.ActorAlign.CENTER
         });
         hbox.add_child(this._buttonText);
-        hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
+        //hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
 
         this._createHistoryLabel();
@@ -104,6 +105,93 @@ const TranslateIndicator = Lang.Class({
     },
 
     _buildMenu: function () {
+        let popupMenuExpander = new PopupMenu.PopupSubMenuMenuItem('From "Detect-Language" to "German"');
+        let searchEntry = new St.Entry({
+            name: 'searchEntry',
+            style_class: 'search-entry',
+            can_focus: true,
+            hint_text: _('Type here to search...'),
+            track_hover: true
+        });
+        popupMenuExpander.menu.box.add(searchEntry);
+
+        let menuSection = new PopupMenu.PopupBaseMenuItem({
+            reactive: false,
+            can_focus: false
+        });
+
+        let scrollI = new St.ScrollView({});
+        let scrollO = new St.ScrollView({});
+        let actor = new St.BoxLayout({
+            reactive: true,
+            x_expand: true,
+            y_expand: true,
+            x_align: St.Align.END,
+            y_align: St.Align.MIDDLE,
+            vertical: true
+        });
+        actor.add(scrollI, {
+            x_fill: true,
+            y_fill: true,
+            expand: true
+        });
+        actor.add(scrollO, {
+            x_fill: true,
+            y_fill: true,
+            expand: true
+        });//Translate Input
+        let inputEntry = new St.Entry({
+            name: 'inputEntry',
+            style_class: 'entry',
+            can_focus: true,
+            hint_text: _('Type here to translate...'),
+            track_hover: true
+        });
+        inputEntry.get_clutter_text().set_single_line_mode(false);
+        inputEntry.get_clutter_text().set_line_wrap(true);
+        inputEntry.get_clutter_text().set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+        inputEntry.get_clutter_text().set_max_length(0);
+        //Translate Output
+        let outputEntry = new St.Entry({
+            name: 'outputEntry',
+            style_class: 'entry',
+            can_focus: true,
+            hint_text: _('Type here to translate...'),
+            track_hover: true
+        });
+        outputEntry.get_clutter_text().set_single_line_mode(false);
+        outputEntry.get_clutter_text().set_activatable(true);
+
+        let _boxI = new St.BoxLayout({
+            vertical: true,
+        });
+        _boxI.add(inputEntry, {
+            y_align: St.Align.START,
+            y_fill: true,
+            x_fill: true,
+        });
+        let _boxO = new St.BoxLayout({
+            vertical: true,
+        });
+        _boxO.add(outputEntry, {
+            y_align: St.Align.START,
+            y_fill: true,
+            x_fill: true,
+        });
+        scrollI.add_actor(_boxI);
+        scrollO.add_actor(_boxO);
+        menuSection.actor.add_actor(actor, { expand: true });
+        /*
+        inputEntry.get_clutter_text().connect(
+            'text-changed',
+            Lang.bind(this, this._onSearchTextChanged)
+        );
+         */
+
+
+        this.menu.addMenuItem(popupMenuExpander);
+        this.menu.addMenuItem(menuSection);
+
         let that = this;
         this._getCache(function (clipHistory) {
             let lastIdx = clipHistory.length - 1;
