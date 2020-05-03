@@ -22,5 +22,6 @@
 
 .entry{
     width: 100%;
+    min-width: 300px;
     border-radius: 15px;
 }
