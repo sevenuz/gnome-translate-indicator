@@ -42,6 +42,7 @@ function readRegistry (callback) {
     if (typeof callback !== 'function')
         throw TypeError('`callback` must be a function');
 
+    let registry = SettingsSchema.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
     if (GLib.file_test(REGISTRY_PATH, FileTest.EXISTS)) {
         let file = Gio.file_new_for_path(REGISTRY_PATH);
 
@@ -54,21 +55,9 @@ function readRegistry (callback) {
 
                 if (success) {
                     try {
-                        let max_size = SettingsSchema.get_int(Prefs.Fields.HISTORY_SIZE);
-
-                        // are we running gnome 3.30 or higher?
-                        if (contents instanceof Uint8Array) {
-                          contents = imports.byteArray.toString(contents);
-                        }
-
                         registry = JSON.parse(contents);
                     }
-                    catch (e) {
-                        registry = [];
-                    }
-                }
-                else {
-                    registry = [];
+                    catch (e) {}
                 }
 
                 callback(registry);
@@ -76,6 +65,6 @@ function readRegistry (callback) {
         });
     }
     else {
-        callback([]);
+        callback(registry);
     }
 }

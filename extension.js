@@ -34,7 +34,7 @@ const prettyPrint = Utils.prettyPrint;
 const writeRegistry = Utils.writeRegistry;
 const readRegistry = Utils.readRegistry;
 
-let TRANSLATE_OPTIONS = 'trans :en -j ';
+let TRANSLATE_OPTIONS = 'trans...';
 
 const TranslateIndicator = Lang.Class({
     Name: 'TranslateIndicator',
@@ -71,8 +71,9 @@ const TranslateIndicator = Lang.Class({
         //hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
 
-        this._buildMenu();
         this._loadSettings();
+        this._buildMenu();
+        this._fetchSettings();
     },
 
     _buildMenu: function () {
@@ -85,6 +86,8 @@ const TranslateIndicator = Lang.Class({
             track_hover: true
         });
         popupMenuExpander.menu.box.add(this.searchEntry);
+        //Save in schema doesnt work
+        //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.searchEntry, 'value', Gio.SettingsBindFlags.DEFAULT);
 
         let menuSection = new PopupMenu.PopupBaseMenuItem({
             reactive: false,
@@ -169,8 +172,8 @@ const TranslateIndicator = Lang.Class({
 
     _onSearchTextChanged: function () {
         //TODO new translation
-        TRANSLATE_OPTIONS = this.searchEntry.get_text();
-        writeRegistry(TRANSLATE_OPTIONS);
+        this._showNotification(Utils.REGISTRY_PATH+' ' + this.searchEntry.get_text());
+        writeRegistry(this.searchEntry.get_text());
     },
 
     _onInputTextChanged: function () {
@@ -188,6 +191,30 @@ const TranslateIndicator = Lang.Class({
         Clipboard.get_text(type, function (clipBoard, text) {
             //that._processTranslateContent(text);
         });
+    },
+
+    async _exec(command) {
+        if (!Array.isArray(command))
+            throw 'Parameter has to be an array';
+        try {
+            let proc = new Gio.Subprocess({
+                argv: command,
+                flags: Gio.SubprocessFlags.STDOUT_PIPE
+            });
+            proc.init(null);
+            return await new Promise((resolve, reject) => {
+                proc.communicate_utf8_async(null, null, (proc, res) => {
+                    try {
+                        let [ok, stdout, stderr] = proc.communicate_utf8_finish(res);
+                        resolve(stdout);
+                    } catch(error) {
+                        reject(error);
+                    }
+                });
+            });
+        } catch (error) {
+            logError(error);
+        }
     },
 
     _initNotifSource: function () {
@@ -224,13 +251,17 @@ const TranslateIndicator = Lang.Class({
 
     _loadSettings: function () {
         this._settings = Prefs.SettingsSchema;
+        this._settingsChangedId = this._settings.connect('changed',
+            Lang.bind(this, this._fetchSettings));
 
-        readRegistry(function (s) {
+        this._bindShortcuts();
+    },
+
+    _fetchSettings: function () {
+        readRegistry((s) => {
             TRANSLATE_OPTIONS = s;
             this.searchEntry.set_text(TRANSLATE_OPTIONS);
         });
-
-        this._bindShortcuts();
     },
 
     _bindShortcuts: function () {

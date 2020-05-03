@@ -2,6 +2,13 @@
   <schema id="org.gnome.shell.extensions.translate-indicator"
       path="/org/gnome/shell/extensions/translate-indicator/">
 
+    <key name="translate-options" type="s">
+      <default>'trans :en -j '</default>
+      <summary>Translate Option</summary>
+      <description>
+          String which is the command to translate the string
+      </description>
+    </key>
     <key name="translate-with-notification" type="as">
       <default><![CDATA[['<Super><Alt>T']]]></default>
       <summary>Translate with Notification</summary>

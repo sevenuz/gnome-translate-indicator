@@ -11,6 +11,10 @@ const _ = Gettext.domain('translate-indicator').gettext;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.translate-indicator';
 
+var Fields = {
+    TRANSLATE_OPTIONS        : 'translate-options'
+};
+
 const getSchema = function () {
     let schemaDir = Extension.dir.get_child('schemas').get_path();
     let schemaSource = Gio.SettingsSchemaSource.new_from_directory(schemaDir, Gio.SettingsSchemaSource.get_default(), false);

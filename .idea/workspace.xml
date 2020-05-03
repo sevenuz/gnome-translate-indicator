@@ -4,27 +4,9 @@
     <list default="true" id="5a2a0e2a-f399-4be4-9283-66ecb6f75c9f" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/extension.js" beforeDir="false" afterPath="$PROJECT_DIR$/extension.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/ar/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/ar/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/ca/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/ca/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/cs/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/cs/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/de/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/de/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/el/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/el/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/es/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/es/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/es_ES/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/es_ES/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/fi/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/fi/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/fr_FR/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/fr_FR/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/it/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/it/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/ja/LC_MESSAGES/ja.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/ja/LC_MESSAGES/ja.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/pl/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/pl/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/pt_BR/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/pt_BR/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/ru/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/ru/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/sk/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/sk/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/tr/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/tr/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/locale/zh_CN/LC_MESSAGES/clipboard-indicator.mo" beforeDir="false" afterPath="$PROJECT_DIR$/locale/zh_CN/LC_MESSAGES/clipboard-indicator.mo" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/prefs.js" beforeDir="false" afterPath="$PROJECT_DIR$/prefs.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schemas/gschemas.compiled" beforeDir="false" afterPath="$PROJECT_DIR$/schemas/gschemas.compiled" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/schemas/org.gnome.shell.extensions.clipboard-indicator.gschema.xml" beforeDir="false" afterPath="$PROJECT_DIR$/schemas/org.gnome.shell.extensions.clipboard-indicator.gschema.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stylesheet.css" beforeDir="false" afterPath="$PROJECT_DIR$/stylesheet.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/utils.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -104,6 +86,23 @@
       <workItem from="1588470752410" duration="176000" />
       <workItem from="1588470978001" duration="96000" />
       <workItem from="1588471187045" duration="748000" />
+      <workItem from="1588472055720" duration="692000" />
+      <workItem from="1588472829424" duration="58000" />
+      <workItem from="1588472952423" duration="158000" />
+      <workItem from="1588497135322" duration="961000" />
+      <workItem from="1588498150092" duration="42000" />
+      <workItem from="1588498252943" duration="110000" />
+      <workItem from="1588498414556" duration="118000" />
+      <workItem from="1588498604536" duration="78000" />
+      <workItem from="1588498745612" duration="95000" />
+      <workItem from="1588498927047" duration="788000" />
+      <workItem from="1588502739817" duration="405000" />
+      <workItem from="1588503201919" duration="230000" />
+      <workItem from="1588503512616" duration="420000" />
+      <workItem from="1588504081671" duration="38000" />
+      <workItem from="1588504188384" duration="139000" />
+      <workItem from="1588504494327" duration="73000" />
+      <workItem from="1588504624675" duration="178000" />
     </task>
     <servers />
   </component>
