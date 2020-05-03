@@ -7,24 +7,9 @@ const Utils = Extension.imports.utils;
 const prettyPrint = Utils.prettyPrint;
 
 const Gettext = imports.gettext;
-const _ = Gettext.domain('clipboard-indicator').gettext;
+const _ = Gettext.domain('translate-indicator').gettext;
 
-var Fields = {
-    INTERVAL           : 'refresh-interval',
-    HISTORY_SIZE       : 'history-size',
-    PREVIEW_SIZE       : 'preview-size',
-    CACHE_FILE_SIZE    : 'cache-size',
-    CACHE_ONLY_FAVORITE : 'cache-only-favorites',
-    DELETE             : 'enable-deletion',
-    NOTIFY_ON_COPY     : 'notify-on-copy',
-    MOVE_ITEM_FIRST    : 'move-item-first',
-    ENABLE_KEYBINDING  : 'enable-keybindings',
-    TOPBAR_PREVIEW_SIZE: 'topbar-preview-size',
-    TOPBAR_DISPLAY_MODE_ID    : 'display-mode',
-    STRIP_TEXT         : 'strip-text'
-};
-
-const SCHEMA_NAME = 'org.gnome.shell.extensions.clipboard-indicator';
+const SCHEMA_NAME = 'org.gnome.shell.extensions.translate-indicator';
 
 const getSchema = function () {
     let schemaDir = Extension.dir.get_child('schemas').get_path();
@@ -40,11 +25,11 @@ var SettingsSchema = getSchema();
 function init() {
     let localeDir = Extension.dir.get_child('locale');
     if (localeDir.query_exists(null))
-        Gettext.bindtextdomain('clipboard-indicator', localeDir.get_path());
+        Gettext.bindtextdomain('translate-indicator', localeDir.get_path());
 }
 
 const App = new Lang.Class({
-    Name: 'ClipboardIndicator.App',
+    Name: 'TranslateIndicator.App',
     _init: function() {
         this.main = new Gtk.Grid({
             margin: 10,
@@ -53,61 +38,11 @@ const App = new Lang.Class({
             column_homogeneous: false,
             row_homogeneous: false
         });
-        this.field_interval = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 500,
-                upper: 5000,
-                step_increment: 100
-            })
-        });
-        this.field_size = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 1,
-                upper: 200,
-                step_increment: 1
-            })
-        });
-        this.field_preview_size = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 10,
-                upper: 100,
-                step_increment: 1
-            })
-        });
-        this.field_cache_size = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 512,
-                upper: Math.pow(2, 14),
-                step_increment: 1
-            })
-        });
-        this.field_topbar_preview_size = new Gtk.SpinButton({
-            adjustment: new Gtk.Adjustment({
-                lower: 1,
-                upper: 100,
-                step_increment: 1
-            })
-        });
-        this.field_display_mode = new Gtk.ComboBox({
-            model: this._create_display_mode_options()});
-
-        let rendererText = new Gtk.CellRendererText();
-        this.field_display_mode.pack_start (rendererText, false);
-        this.field_display_mode.add_attribute (rendererText, "text", 0);
-
-        this.field_cache_disable = new Gtk.Switch();
-        this.field_notification_toggle = new Gtk.Switch();
-        this.field_strip_text = new Gtk.Switch();
-        this.field_move_item_first = new Gtk.Switch();
         this.field_keybinding = createKeybindingWidget(SettingsSchema);
-        addKeybinding(this.field_keybinding.model, SettingsSchema, "toggle-menu",
+        addKeybinding(this.field_keybinding.model, SettingsSchema, "translate-with-notification",
                       _("Toggle the menu"));
-        addKeybinding(this.field_keybinding.model, SettingsSchema, "clear-history",
+        addKeybinding(this.field_keybinding.model, SettingsSchema, "translate-from-selection",
                       _("Clear history"));
-        addKeybinding(this.field_keybinding.model, SettingsSchema, "prev-entry",
-                      _("Previous entry"));
-        addKeybinding(this.field_keybinding.model, SettingsSchema, "next-entry",
-                      _("Next entry"));
 
         var that = this;
         this.field_keybinding_activation = new Gtk.Switch();
@@ -115,58 +50,8 @@ const App = new Lang.Class({
             that.field_keybinding.set_sensitive(widget.active);
         });
 
-        let sizeLabel     = new Gtk.Label({
-            label: _("History Size"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let intervalLabel = new Gtk.Label({
-            label: _("Refresh Interval (ms)"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let previewLabel  = new Gtk.Label({
-            label: _("Preview Size (characters)"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let cacheSizeLabel  = new Gtk.Label({
-            label: _("Max cache file size (kb)"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let cacheDisableLabel  = new Gtk.Label({
-            label: _("Cache only favorites"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let notificationLabel  = new Gtk.Label({
-            label: _("Show notification on copy"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let moveFirstLabel  = new Gtk.Label({
-            label: _("Move item to the top after selection"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
         let keybindingLabel  = new Gtk.Label({
             label: _("Keyboard shortcuts"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let topbarPreviewLabel  = new Gtk.Label({
-            label: _("Number of characters in top bar"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let displayModeLabel  = new Gtk.Label({
-            label: _("What to show in top bar"),
-            hexpand: true,
-            halign: Gtk.Align.START
-        });
-        let stripTextLabel = new Gtk.Label({
-            label: _("Remove whitespace around text"),
             hexpand: true,
             halign: Gtk.Align.START
         });
@@ -193,46 +78,11 @@ const App = new Lang.Class({
             };
         })(this.main);
 
-        addRow(sizeLabel,           this.field_size);
-        addRow(previewLabel,        this.field_preview_size);
-        addRow(intervalLabel,       this.field_interval);
-        addRow(cacheSizeLabel,      this.field_cache_size);
-        addRow(cacheDisableLabel,   this.field_cache_disable);
-        addRow(notificationLabel,   this.field_notification_toggle);
-        addRow(displayModeLabel,    this.field_display_mode);
-        addRow(topbarPreviewLabel,  this.field_topbar_preview_size);
-        addRow(stripTextLabel,      this.field_strip_text);
-        addRow(moveFirstLabel,      this.field_move_item_first);
         addRow(keybindingLabel,     this.field_keybinding_activation);
         addRow(null,                this.field_keybinding);
-
-        SettingsSchema.bind(Fields.INTERVAL, this.field_interval, 'value', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.HISTORY_SIZE, this.field_size, 'value', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.PREVIEW_SIZE, this.field_preview_size, 'value', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.CACHE_FILE_SIZE, this.field_cache_size, 'value', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.CACHE_ONLY_FAVORITE, this.field_cache_disable, 'active', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.NOTIFY_ON_COPY, this.field_notification_toggle, 'active', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.MOVE_ITEM_FIRST, this.field_move_item_first, 'active', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.TOPBAR_DISPLAY_MODE_ID, this.field_display_mode, 'active', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.TOPBAR_PREVIEW_SIZE, this.field_topbar_preview_size, 'value', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.STRIP_TEXT, this.field_strip_text, 'active', Gio.SettingsBindFlags.DEFAULT);
-        SettingsSchema.bind(Fields.ENABLE_KEYBINDING, this.field_keybinding_activation, 'active', Gio.SettingsBindFlags.DEFAULT);
-
+        
         this.main.show_all();
     },
-    _create_display_mode_options : function(){
-        let options = [{ name: _("Icon") },
-        { name: _("Clipboard Content"),},
-        { name: _("Both")}];
-        let liststore = new Gtk.ListStore();
-        liststore.set_column_types([GObject.TYPE_STRING])
-        for (let i = 0; i < options.length; i++ ) {
-            let option = options[i];
-            let iter = liststore.append();
-            liststore.set (iter, [0], [option.name]);
-        }
-        return liststore;
-    }
 });
 
 function buildPrefsWidget(){

@@ -20,11 +20,10 @@ const _ = Gettext.domain('translate-indicator').gettext;
 
 const Clipboard = St.Clipboard.get_default();
 const CLIPBOARD_TYPE = St.ClipboardType.CLIPBOARD;
+const SELECTION_TYPE = St.ClipboardType.PRIMARY;
 
-const SETTING_KEY_CLEAR_HISTORY = "clear-history";
-const SETTING_KEY_PREV_ENTRY = "prev-entry";
-const SETTING_KEY_NEXT_ENTRY = "next-entry";
-const SETTING_KEY_TOGGLE_MENU = "toggle-menu";
+const SETTING_KEY_TRANSLATE_NOTIFICATION = "translate-with-notification";
+const SETTING_KEY_TRANSLATE_MENU = "translate-from-selection";
 const INDICATOR_ICON = 'insert-text-symbolic';
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -35,18 +34,7 @@ const prettyPrint = Utils.prettyPrint;
 const writeRegistry = Utils.writeRegistry;
 const readRegistry = Utils.readRegistry;
 
-let TIMEOUT_MS           = 1000;
-let MAX_REGISTRY_LENGTH  = 15;
-let MAX_ENTRY_LENGTH     = 50;
-let CACHE_ONLY_FAVORITE  = false;
-let DELETE_ENABLED       = true;
-let MOVE_ITEM_FIRST      = false;
-let ENABLE_KEYBINDING    = true;
-let PRIVATEMODE          = false;
-let NOTIFY_ON_COPY       = true;
-let MAX_TOPBAR_LENGTH    = 15;
-let TOPBAR_DISPLAY_MODE  = 1; //0 - only icon, 1 - only clipbord content, 2 - both
-let STRIP_TEXT           = false;
+let TRANSLATE_OPTIONS = 'trans :en -j ';
 
 const TranslateIndicator = Lang.Class({
     Name: 'TranslateIndicator',
@@ -83,8 +71,8 @@ const TranslateIndicator = Lang.Class({
         //hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
 
-        this._loadSettings();
         this._buildMenu();
+        this._loadSettings();
     },
 
     _buildMenu: function () {
@@ -96,7 +84,6 @@ const TranslateIndicator = Lang.Class({
             hint_text: _('Type here to search...'),
             track_hover: true
         });
-        this.searchEntry.set_text('trans :de -j ');
         popupMenuExpander.menu.box.add(this.searchEntry);
 
         let menuSection = new PopupMenu.PopupBaseMenuItem({
@@ -166,6 +153,10 @@ const TranslateIndicator = Lang.Class({
         scrollO.add_actor(_boxO);
         menuSection.actor.add_actor(actor, { expand: true });
 
+        this.searchEntry.get_clutter_text().connect(
+            'text-changed',
+            Lang.bind(this, this._onSearchTextChanged)
+        );
         this.inputEntry.get_clutter_text().connect(
             'text-changed',
             Lang.bind(this, this._onInputTextChanged)
@@ -176,24 +167,27 @@ const TranslateIndicator = Lang.Class({
         this.menu.addMenuItem(menuSection);
     },
 
+    _onSearchTextChanged: function () {
+        //TODO new translation
+        TRANSLATE_OPTIONS = this.searchEntry.get_text();
+        writeRegistry(TRANSLATE_OPTIONS);
+    },
+
     _onInputTextChanged: function () {
         this._showNotification(this.searchEntry.get_text());
     },
 
-    _getFromClipboard: function () {
+    _selectInputEntry: function () {
+        this.inputEntry.get_clutter_text().set_selection(0, this.inputEntry.get_clutter_text().text.length);
+    },
+
+    _getFromClipboard: function (type = CLIPBOARD_TYPE) {
         let that = this;
 
         //Clipboard.set_text(CLIPBOARD_TYPE, "");
-        Clipboard.get_text(CLIPBOARD_TYPE, function (clipBoard, text) {
+        Clipboard.get_text(type, function (clipBoard, text) {
             //that._processTranslateContent(text);
         });
-    },
-
-    _openSettings: function () {
-        Util.spawn([
-            "gnome-shell-extension-prefs",
-            Me.uuid
-        ]);
     },
 
     _initNotifSource: function () {
@@ -230,45 +224,29 @@ const TranslateIndicator = Lang.Class({
 
     _loadSettings: function () {
         this._settings = Prefs.SettingsSchema;
-        this._settingsChangedId = this._settings.connect('changed',
-            Lang.bind(this, this._onSettingsChange));
 
-        this._fetchSettings();
+        readRegistry(function (s) {
+            TRANSLATE_OPTIONS = s;
+            this.searchEntry.set_text(TRANSLATE_OPTIONS);
+        });
 
-        if (ENABLE_KEYBINDING)
-            this._bindShortcuts();
-    },
-
-    _fetchSettings: function () {
-        TIMEOUT_MS           = this._settings.get_int(Prefs.Fields.INTERVAL);
-        MAX_REGISTRY_LENGTH  = this._settings.get_int(Prefs.Fields.HISTORY_SIZE);
-        MAX_ENTRY_LENGTH     = this._settings.get_int(Prefs.Fields.PREVIEW_SIZE);
-        CACHE_ONLY_FAVORITE  = this._settings.get_boolean(Prefs.Fields.CACHE_ONLY_FAVORITE);
-        DELETE_ENABLED       = this._settings.get_boolean(Prefs.Fields.DELETE);
-        MOVE_ITEM_FIRST      = this._settings.get_boolean(Prefs.Fields.MOVE_ITEM_FIRST);
-        NOTIFY_ON_COPY       = this._settings.get_boolean(Prefs.Fields.NOTIFY_ON_COPY);
-        ENABLE_KEYBINDING    = this._settings.get_boolean(Prefs.Fields.ENABLE_KEYBINDING);
-        MAX_TOPBAR_LENGTH    = this._settings.get_int(Prefs.Fields.TOPBAR_PREVIEW_SIZE);
-        TOPBAR_DISPLAY_MODE  = this._settings.get_int(Prefs.Fields.TOPBAR_DISPLAY_MODE_ID);
-        STRIP_TEXT           = this._settings.get_boolean(Prefs.Fields.STRIP_TEXT);
-    },
-
-    _onSettingsChange: function () {
-        var that = this;
-
-        // Load the settings into variables
-        that._fetchSettings();
-
-        // Bind or unbind shortcuts
-        if (ENABLE_KEYBINDING)
-            that._bindShortcuts();
-        else
-            that._unbindShortcuts();
+        this._bindShortcuts();
     },
 
     _bindShortcuts: function () {
         this._unbindShortcuts();
-        this._bindShortcut(SETTING_KEY_TOGGLE_MENU, this._toggleMenu);
+        this._bindShortcut(SETTING_KEY_TRANSLATE_NOTIFICATION, this._translateWithPopup);
+        this._bindShortcut(SETTING_KEY_TRANSLATE_MENU, this._toggleMenu);
+    },
+
+    _translateWithPopup: function () {
+      //TODO translate and show popup
+      this._showNotification('translated...');
+    },
+
+    _toggleMenu: function(){
+        //TODO set input from selection
+        this.menu.toggle();
     },
 
     _unbindShortcuts: function () {
@@ -301,10 +279,6 @@ const TranslateIndicator = Lang.Class({
         this._settings.disconnect(this._settingsChangedId);
         this._settingsChangedId = null;
     },
-
-    _toggleMenu: function(){
-        this.menu.toggle();
-    }
 });
 
 function init () {

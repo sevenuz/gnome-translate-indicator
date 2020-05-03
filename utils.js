@@ -14,35 +14,6 @@ const REGISTRY_FILE = 'registry.txt';
 const REGISTRY_PATH = REGISTRY_DIR + '/' + REGISTRY_FILE;
 const BACKUP_REGISTRY_PATH = REGISTRY_PATH + '~';
 
-// Print objects... why no dev tools
-function prettyPrint (name, obj, recurse, _indent) {
-    let prefix = '';
-    let indent = typeof _indent === 'number' ? _indent : 0;
-    for (let i = 0; i < indent; i++) {
-        prefix += '    ';
-    }
-
-    recurse = typeof recurse === 'boolean' ? recurse : true;
-    if (typeof name !== 'string') {
-        obj = arguments[0];
-        recurse = arguments[1];
-        _indent = arguments[2];
-        name = obj.toString();
-    }
-
-    log(prefix + '--------------');
-    log(prefix + name);
-    log(prefix + '--------------');
-    for (let k in obj) {
-        if (typeof obj[k] === 'object' && recurse) {
-            prettyPrint(name + '::' + k, obj[k], true, indent + 1);
-        }
-        else {
-            log(prefix + k, typeof obj[k] === 'function' ? '[Func]' : obj[k]);
-        }
-    }
-}
-
 // I/O Files
 function writeRegistry (registry) {
     let json = JSON.stringify(registry);
@@ -73,21 +44,9 @@ function readRegistry (callback) {
 
     if (GLib.file_test(REGISTRY_PATH, FileTest.EXISTS)) {
         let file = Gio.file_new_for_path(REGISTRY_PATH);
-        let CACHE_FILE_SIZE = SettingsSchema.get_int(Prefs.Fields.CACHE_FILE_SIZE);
 
         file.query_info_async('*', FileQueryInfoFlags.NONE,
                               GLib.PRIORITY_DEFAULT, null, function (src, res) {
-            // Check if file size is larger than CACHE_FILE_SIZE
-            // If so, make a backup of file, and invoke callback with empty array
-            let file_info = src.query_info_finish(res);
-
-            if (file_info.get_size() >= CACHE_FILE_SIZE * 1024) {
-                let destination = Gio.file_new_for_path(BACKUP_REGISTRY_PATH);
-
-                file.move(destination, FileCopyFlags.OVERWRITE, null, null);
-                callback([]);
-                return;
-            }
 
             file.load_contents_async(null, function (obj, res) {
                 let registry;
@@ -103,18 +62,6 @@ function readRegistry (callback) {
                         }
 
                         registry = JSON.parse(contents);
-
-                        let registryNoFavorite = registry.filter(
-                            item => item['favorite'] === false);
-
-                        while (registryNoFavorite.length > max_size) {
-                            let oldestNoFavorite = registryNoFavorite.shift();
-                            let itemIdx = registry.indexOf(oldestNoFavorite);
-                            registry.splice(itemIdx,1);
-
-                            registryNoFavorite = registry.filter(
-                                item => item["favorite"] === false);
-                        }
                     }
                     catch (e) {
                         registry = [];
