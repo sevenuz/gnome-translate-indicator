@@ -30,11 +30,12 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const Prefs = Me.imports.prefs;
-const prettyPrint = Utils.prettyPrint;
 const writeRegistry = Utils.writeRegistry;
 const readRegistry = Utils.readRegistry;
 
+const STRING_INDICATOR = '%s';
 let TRANSLATE_OPTIONS = 'trans...';
+let TIMEOUT_INSTANT_TRANSLATION = 0;
 
 const TranslateIndicator = Lang.Class({
     Name: 'TranslateIndicator',
@@ -122,7 +123,7 @@ const TranslateIndicator = Lang.Class({
             track_hover: true
         });
         this.inputEntry.get_clutter_text().set_single_line_mode(false);
-        this.inputEntry.get_clutter_text().set_line_wrap(true);
+        //this.inputEntry.get_clutter_text().set_line_wrap(true);
         this.inputEntry.get_clutter_text().set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
         this.inputEntry.get_clutter_text().set_max_length(0);
         //Translate Output
@@ -133,8 +134,9 @@ const TranslateIndicator = Lang.Class({
             hint_text: _('Type here to translate...'),
             track_hover: true
         });
-        this.outputEntry.get_clutter_text().set_single_line_mode(false);
         this.outputEntry.get_clutter_text().set_activatable(false);
+        this.outputEntry.get_clutter_text().set_single_line_mode(false);
+        this.outputEntry.get_clutter_text().set_editable(false);
 
         let _boxI = new St.BoxLayout({
             vertical: true,
@@ -160,37 +162,78 @@ const TranslateIndicator = Lang.Class({
             'text-changed',
             Lang.bind(this, this._onSearchTextChanged)
         );
+        this.searchEntry.get_clutter_text().connect('key-press-event', (object, event) => {
+            this._on_key_press_event(object, event);
+        });
         this.inputEntry.get_clutter_text().connect(
             'text-changed',
             Lang.bind(this, this._onInputTextChanged)
         );
-
+        this.inputEntry.get_clutter_text().connect('key-press-event', (object, event) => {
+            this._on_key_press_event(object, event);
+        });
 
         this.menu.addMenuItem(popupMenuExpander);
         this.menu.addMenuItem(menuSection);
+
+        this.menu.connect('open-state-changed', Lang.bind(this, function(self, open){
+            let a = Mainloop.timeout_add(50, Lang.bind(this, () => {
+                if (open) {
+                    this._getFromClipboard(SELECTION_TYPE, (cb, text)=>{
+                        that.inputEntry.set_text(text);
+                        this._selectInputEntry();
+                    });
+                    this.inputEntry.get_clutter_text().grab_key_focus();
+                }
+                Mainloop.source_remove(a);
+            }));
+        }));
     },
 
     _onSearchTextChanged: function () {
-        //TODO new translation
-        this._showNotification(Utils.REGISTRY_PATH+' ' + this.searchEntry.get_text());
-        writeRegistry(this.searchEntry.get_text());
+        TRANSLATE_OPTIONS = this.searchEntry.get_text();
+        //this._settings.set_string(Prefs.FIELDS.TRANSLATE_OPTIONS, TRANSLATE_OPTIONS);
+        writeRegistry(TRANSLATE_OPTIONS);
+        //this._onInputTextChanged();
     },
 
-    _onInputTextChanged: function () {
-        this._showNotification(this.searchEntry.get_text());
+    _onInputTextChanged: function () {},
+
+    _on_key_press_event(object, event) {
+        let symbol = event.get_key_symbol();
+        //let code = event.get_key_code();
+        //let state = event.get_state();
+
+        //65293 - Enter
+        if (symbol === 65293) {
+            this._translate(this.inputEntry.get_text()).then((t, err)=>{
+                this.outputEntry.get_clutter_text().set_markup(t);
+                //this.outputEntry.set_text(t);
+            });
+        }
     },
 
     _selectInputEntry: function () {
-        this.inputEntry.get_clutter_text().set_selection(0, this.inputEntry.get_clutter_text().text.length);
+        this.inputEntry.set_selection(0, this.inputEntry.get_text().length);
     },
 
-    _getFromClipboard: function (type = CLIPBOARD_TYPE) {
-        let that = this;
-
+    _getFromClipboard (type, cb) {
         //Clipboard.set_text(CLIPBOARD_TYPE, "");
         Clipboard.get_text(type, function (clipBoard, text) {
-            //that._processTranslateContent(text);
+            cb(clipBoard, text);
         });
+    },
+
+    async _translate (str) {
+        let opt = TRANSLATE_OPTIONS.split(' ');
+        if (TRANSLATE_OPTIONS.indexOf(STRING_INDICATOR) >= 0) {
+            opt.forEach((s, i)=>{
+                opt[i] = s.replace(STRING_INDICATOR, str)
+            });
+        } else {
+            opt.push(str);
+        }
+        return this._exec(opt);
     },
 
     async _exec(command) {
@@ -206,15 +249,48 @@ const TranslateIndicator = Lang.Class({
                 proc.communicate_utf8_async(null, null, (proc, res) => {
                     try {
                         let [ok, stdout, stderr] = proc.communicate_utf8_finish(res);
-                        resolve(stdout);
+                        resolve(this._escape_translation(stdout));
                     } catch(error) {
                         reject(error);
                     }
                 });
             });
         } catch (error) {
-            logError(error);
+            this._showNotification(JSON.stringify(error));
         }
+    },
+
+    _escape_translation(str) {
+        if (!str) {
+            return '';
+        }
+
+        let stuff = {
+            "\x1B[1m": '<b>',
+            "\x1B[22m": '</b>',
+            "\x1B[4m": '<u>',
+            "\x1B[24m": '</u>'
+        };
+        str = this._escape_html(str);
+        for (let hex in stuff) {
+            str = this._replace_all(str, hex, stuff[hex]);
+        }
+        return str;
+    },
+
+    _replace_all(str, find, replace) {
+        return (str || '')
+            .split(find)
+            .join(replace);
+    },
+
+    _escape_html(str) {
+        return (str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     },
 
     _initNotifSource: function () {
@@ -257,11 +333,15 @@ const TranslateIndicator = Lang.Class({
         this._bindShortcuts();
     },
 
-    _fetchSettings: function () {
+    _fetchSettings: function (cb) {
         readRegistry((s) => {
             TRANSLATE_OPTIONS = s;
             this.searchEntry.set_text(TRANSLATE_OPTIONS);
+            if (typeof cb === 'function')
+                cb(s);
         });
+        //TRANSLATE_OPTIONS = this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
+        //this.searchEntry.set_text(TRANSLATE_OPTIONS);
     },
 
     _bindShortcuts: function () {
@@ -271,12 +351,15 @@ const TranslateIndicator = Lang.Class({
     },
 
     _translateWithPopup: function () {
-      //TODO translate and show popup
-      this._showNotification('translated...');
+        this._getFromClipboard(CLIPBOARD_TYPE, (cb, text)=>{
+            this._fetchSettings(() => {
+                this._translate(text).then(str=>this._showNotification(str));
+            });
+        });
+        //this._showNotification(this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS));
     },
 
     _toggleMenu: function(){
-        //TODO set input from selection
         this.menu.toggle();
     },
 
