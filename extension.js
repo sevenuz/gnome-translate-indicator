@@ -13,7 +13,6 @@ const MessageTray = imports.ui.messageTray;
 const Main      = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const CheckBox  = imports.ui.checkBox.CheckBox;
 
 const Gettext = imports.gettext;
 const _ = Gettext.domain('translate-indicator').gettext;
@@ -33,9 +32,9 @@ const Prefs = Me.imports.prefs;
 const writeRegistry = Utils.writeRegistry;
 const readRegistry = Utils.readRegistry;
 
-const STRING_INDICATOR = '%s';
-let TRANSLATE_OPTIONS = 'trans...';
-let TIMEOUT_INSTANT_TRANSLATION = 0;
+let TRANSLATE_OPTIONS = 'trans :en -b ';
+const TRANS_CMD = 'trans';
+const TRANS_PATH = '.local/share/gnome-shell/extensions/translate-indicator@athenstaedt.net/';//Me.dir;
 
 const TranslateIndicator = Lang.Class({
     Name: 'TranslateIndicator',
@@ -64,11 +63,7 @@ const TranslateIndicator = Lang.Class({
         this.icon = new St.Icon({ icon_name: INDICATOR_ICON,
             style_class: 'system-status-icon translate-indicator-icon' });
         hbox.add_child(this.icon);
-        this._buttonText = new St.Label({
-            text: _('Text will be here'),
-            y_align: Clutter.ActorAlign.CENTER
-        });
-        hbox.add_child(this._buttonText);
+
         //hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
         this.actor.add_child(hbox);
 
@@ -78,15 +73,28 @@ const TranslateIndicator = Lang.Class({
     },
 
     _buildMenu: function () {
-        let popupMenuExpander = new PopupMenu.PopupSubMenuMenuItem('From "Detect-Language" to "German"');
+        let popupMenuExpander = new PopupMenu.PopupSubMenuMenuItem('Translate Options');
+        let searchLayout = new St.BoxLayout({
+            reactive: true,
+            x_expand: true,
+            y_expand: true,
+            x_align: St.Align.END,
+            y_align: St.Align.MIDDLE,
+        });
+        let _searchLabel = new St.Label({
+            text: _('trans'),
+            y_align: Clutter.ActorAlign.CENTER
+        });
         this.searchEntry = new St.Entry({
             name: 'searchEntry',
             style_class: 'search-entry',
             can_focus: true,
-            hint_text: _('Type here to search...'),
+            hint_text: _('Your translation parameter (-h for help)'),
             track_hover: true
         });
-        popupMenuExpander.menu.box.add(this.searchEntry);
+        searchLayout.add(_searchLabel);
+        searchLayout.add(this.searchEntry);
+        popupMenuExpander.menu.box.add(searchLayout);
         //Save in schema doesnt work
         //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.searchEntry, 'value', Gio.SettingsBindFlags.DEFAULT);
 
@@ -94,7 +102,6 @@ const TranslateIndicator = Lang.Class({
             reactive: false,
             can_focus: false
         });
-
         let scrollI = new St.ScrollView({});
         let scrollO = new St.ScrollView({});
         let actor = new St.BoxLayout({
@@ -123,7 +130,7 @@ const TranslateIndicator = Lang.Class({
             track_hover: true
         });
         this.inputEntry.get_clutter_text().set_single_line_mode(false);
-        //this.inputEntry.get_clutter_text().set_line_wrap(true);
+        this.inputEntry.get_clutter_text().set_line_wrap(true);
         this.inputEntry.get_clutter_text().set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
         this.inputEntry.get_clutter_text().set_max_length(0);
         //Translate Output
@@ -131,10 +138,12 @@ const TranslateIndicator = Lang.Class({
             name: 'outputEntry',
             style_class: 'entry',
             can_focus: true,
-            hint_text: _('Type here to translate...'),
+            hint_text: _('Wait for translation...'),
             track_hover: true
         });
-        this.outputEntry.get_clutter_text().set_activatable(false);
+        this.outputEntry.get_clutter_text().set_activatable(true);
+        this.outputEntry.get_clutter_text().set_line_wrap(true);
+        this.outputEntry.get_clutter_text().set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
         this.outputEntry.get_clutter_text().set_single_line_mode(false);
         this.outputEntry.get_clutter_text().set_editable(false);
 
@@ -179,11 +188,15 @@ const TranslateIndicator = Lang.Class({
         this.menu.connect('open-state-changed', Lang.bind(this, function(self, open){
             let a = Mainloop.timeout_add(50, Lang.bind(this, () => {
                 if (open) {
-                    this._getFromClipboard(SELECTION_TYPE, (cb, text)=>{
-                        that.inputEntry.set_text(text);
+                    /*
+                    this._getFromClipboard(CLIPBOARD_TYPE, (cb, text)=>{
+                        this.inputEntry.set_text(text);
                         this._selectInputEntry();
                     });
+                    this.outputEntry.set_text('');
+                     */
                     this.inputEntry.get_clutter_text().grab_key_focus();
+                    this._selectInputEntry();
                 }
                 Mainloop.source_remove(a);
             }));
@@ -214,7 +227,7 @@ const TranslateIndicator = Lang.Class({
     },
 
     _selectInputEntry: function () {
-        this.inputEntry.set_selection(0, this.inputEntry.get_text().length);
+        this.inputEntry.get_clutter_text().set_selection(0, this.inputEntry.get_text().length);
     },
 
     _getFromClipboard (type, cb) {
@@ -224,15 +237,18 @@ const TranslateIndicator = Lang.Class({
         });
     },
 
+    _validTranslateOptions () {
+        let b = TRANSLATE_OPTIONS.trim().length>0;
+        if (!b)
+            this._showNotification('No translation options given!');
+        return b;
+    },
+
     async _translate (str) {
-        let opt = TRANSLATE_OPTIONS.split(' ');
-        if (TRANSLATE_OPTIONS.indexOf(STRING_INDICATOR) >= 0) {
-            opt.forEach((s, i)=>{
-                opt[i] = s.replace(STRING_INDICATOR, str)
-            });
-        } else {
-            opt.push(str);
-        }
+        let opt = (this._settings.get_boolean(Prefs.Fields.ENABLE_GLOBAL_TRANS))?[TRANS_CMD]:[TRANS_PATH+TRANS_CMD];
+        if (this._validTranslateOptions())
+            opt = opt.concat(TRANSLATE_OPTIONS.trim().split(' '));
+        opt = opt.concat(str.trim());
         return this._exec(opt);
     },
 
@@ -256,7 +272,8 @@ const TranslateIndicator = Lang.Class({
                 });
             });
         } catch (error) {
-            this._showNotification(JSON.stringify(error));
+            this.outputEntry.set_text(JSON.stringify({p:Me.dir, error}));
+            this._showNotification('Error: ' + JSON.stringify(command));
         }
     },
 
@@ -335,7 +352,7 @@ const TranslateIndicator = Lang.Class({
 
     _fetchSettings: function (cb) {
         readRegistry((s) => {
-            TRANSLATE_OPTIONS = s;
+            TRANSLATE_OPTIONS = s?s:this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
             this.searchEntry.set_text(TRANSLATE_OPTIONS);
             if (typeof cb === 'function')
                 cb(s);
@@ -353,7 +370,8 @@ const TranslateIndicator = Lang.Class({
     _translateWithPopup: function () {
         this._getFromClipboard(CLIPBOARD_TYPE, (cb, text)=>{
             this._fetchSettings(() => {
-                this._translate(text).then(str=>this._showNotification(str));
+                if (this._validTranslateOptions())
+                    this._translate(text).then(str=>this._showNotification(str));
             });
         });
         //this._showNotification(this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS));

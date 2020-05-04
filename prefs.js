@@ -12,7 +12,8 @@ const _ = Gettext.domain('translate-indicator').gettext;
 const SCHEMA_NAME = 'org.gnome.shell.extensions.translate-indicator';
 
 var Fields = {
-    TRANSLATE_OPTIONS        : 'translate-options'
+    TRANSLATE_OPTIONS        : 'translate-options',
+    ENABLE_GLOBAL_TRANS      : 'enable-global-trans'
 };
 
 const getSchema = function () {
@@ -42,6 +43,9 @@ const App = new Lang.Class({
             column_homogeneous: false,
             row_homogeneous: false
         });
+
+        this.field_enable_global_trans = new Gtk.Switch();
+
         this.field_keybinding = createKeybindingWidget(SettingsSchema);
         addKeybinding(this.field_keybinding.model, SettingsSchema, "translate-with-notification",
                       _("Toggle the menu"));
@@ -54,6 +58,11 @@ const App = new Lang.Class({
             that.field_keybinding.set_sensitive(widget.active);
         });
 
+        let labelEnableGlobalTrans  = new Gtk.Label({
+            label: _("Enable global trans"),
+            hexpand: true,
+            halign: Gtk.Align.START
+        });
         let keybindingLabel  = new Gtk.Label({
             label: _("Keyboard shortcuts"),
             hexpand: true,
@@ -82,9 +91,12 @@ const App = new Lang.Class({
             };
         })(this.main);
 
+        addRow(labelEnableGlobalTrans,   this.field_enable_global_trans);
         addRow(keybindingLabel,     this.field_keybinding_activation);
         addRow(null,                this.field_keybinding);
-        
+
+        SettingsSchema.bind(Fields.ENABLE_GLOBAL_TRANS, this.field_enable_global_trans, 'active', Gio.SettingsBindFlags.DEFAULT);
+
         this.main.show_all();
     },
 });

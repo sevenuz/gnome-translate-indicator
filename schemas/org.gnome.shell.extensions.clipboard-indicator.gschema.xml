@@ -2,8 +2,15 @@
   <schema id="org.gnome.shell.extensions.translate-indicator"
       path="/org/gnome/shell/extensions/translate-indicator/">
 
+    <key name="enable-global-trans" type="b">
+      <default>false</default>
+      <summary>Enable the use of a global trans installation</summary>
+      <description>
+        If true, a global trans installation is used, else a local version.
+      </description>
+    </key>
     <key name="translate-options" type="s">
-      <default>'trans :en -j '</default>
+      <default>':en -brief'</default>
       <summary>Translate Option</summary>
       <description>
           String which is the command to translate the string

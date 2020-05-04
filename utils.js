@@ -42,7 +42,7 @@ function readRegistry (callback) {
     if (typeof callback !== 'function')
         throw TypeError('`callback` must be a function');
 
-    let registry = SettingsSchema.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
+    let registry = null;
     if (GLib.file_test(REGISTRY_PATH, FileTest.EXISTS)) {
         let file = Gio.file_new_for_path(REGISTRY_PATH);
 

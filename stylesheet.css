@@ -23,5 +23,6 @@
 .entry{
     width: 100%;
     min-width: 350px;
+    max-width: 550px;
     border-radius: 15px;
 }
