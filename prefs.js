@@ -4,7 +4,6 @@ const Gio = imports.gi.Gio;
 const Lang = imports.lang;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Extension.imports.utils;
-const prettyPrint = Utils.prettyPrint;
 
 const Gettext = imports.gettext;
 const _ = Gettext.domain('translate-indicator').gettext;
@@ -44,27 +43,25 @@ const App = new Lang.Class({
             row_homogeneous: false
         });
 
+        this.translateOptionsEntry = new Gtk.Entry({
+            name: 'translateOptions',
+        });
+        this.translateOptionsEntry.text = SettingsSchema.get_string(Fields.TRANSLATE_OPTIONS);
         this.field_enable_global_trans = new Gtk.Switch();
 
         this.field_keybinding = createKeybindingWidget(SettingsSchema);
         addKeybinding(this.field_keybinding.model, SettingsSchema, "translate-with-notification",
-                      _("Toggle the menu"));
+                      _("Translate with Notification"));
         addKeybinding(this.field_keybinding.model, SettingsSchema, "translate-from-selection",
-                      _("Clear history"));
+                      _("Toggle the menu"));
 
-        var that = this;
-        this.field_keybinding_activation = new Gtk.Switch();
-        this.field_keybinding_activation.connect("notify::active", function(widget){
-            that.field_keybinding.set_sensitive(widget.active);
-        });
-
-        let labelEnableGlobalTrans  = new Gtk.Label({
-            label: _("Enable global trans"),
+        let labelTranslateOptions  = new Gtk.Label({
+            label: _("Default translate options"),
             hexpand: true,
             halign: Gtk.Align.START
         });
-        let keybindingLabel  = new Gtk.Label({
-            label: _("Keyboard shortcuts"),
+        let labelEnableGlobalTrans  = new Gtk.Label({
+            label: _("Enable global trans"),
             hexpand: true,
             halign: Gtk.Align.START
         });
@@ -91,10 +88,11 @@ const App = new Lang.Class({
             };
         })(this.main);
 
+        addRow(labelTranslateOptions,   this.translateOptionsEntry);
         addRow(labelEnableGlobalTrans,   this.field_enable_global_trans);
-        addRow(keybindingLabel,     this.field_keybinding_activation);
         addRow(null,                this.field_keybinding);
 
+        SettingsSchema.bind(Fields.TRANSLATE_OPTIONS, this.translateOptionsEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
         SettingsSchema.bind(Fields.ENABLE_GLOBAL_TRANS, this.field_enable_global_trans, 'active', Gio.SettingsBindFlags.DEFAULT);
 
         this.main.show_all();

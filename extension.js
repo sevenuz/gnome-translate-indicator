@@ -96,7 +96,8 @@ const TranslateIndicator = Lang.Class({
         searchLayout.add(this.searchEntry);
         popupMenuExpander.menu.box.add(searchLayout);
         //Save in schema doesnt work
-        //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.searchEntry, 'value', Gio.SettingsBindFlags.DEFAULT);
+        //searchEntry has to be a Gtk.Entry ...
+        //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.searchEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
 
         let menuSection = new PopupMenu.PopupBaseMenuItem({
             reactive: false,
