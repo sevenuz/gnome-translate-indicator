@@ -29,12 +29,14 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const Prefs = Me.imports.prefs;
+const Languages = Me.imports.languages.languages;
 const writeRegistry = Utils.writeRegistry;
 const readRegistry = Utils.readRegistry;
 
-let TRANSLATE_OPTIONS = 'trans :en -b ';
+let translate_options = ':en -b ';
 const TRANS_CMD = 'trans';
-const TRANS_PATH = '.local/share/gnome-shell/extensions/translate-indicator@athenstaedt.net/';//Me.dir;
+const TRANS_PATH = Me.path + '/'; //'.local/share/gnome-shell/extensions/translate-indicator@athenstaedt.net/';
+const SUBMENU_TITLE = 'Translate Options';
 
 const TranslateIndicator = Lang.Class({
     Name: 'TranslateIndicator',
@@ -60,8 +62,10 @@ const TranslateIndicator = Lang.Class({
         this._shortcutsBindingIds = [];
 
         let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box translate-indicator-hbox' });
-        this.icon = new St.Icon({ icon_name: INDICATOR_ICON,
-            style_class: 'system-status-icon translate-indicator-icon' });
+        this.icon = new St.Icon({
+            style_class: 'system-status-icon'
+        });
+        this.icon.gicon = Gio.icon_new_for_string(`${Me.path}/icons/icon.svg`);
         hbox.add_child(this.icon);
 
         //hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
@@ -73,7 +77,7 @@ const TranslateIndicator = Lang.Class({
     },
 
     _buildMenu: function () {
-        let popupMenuExpander = new PopupMenu.PopupSubMenuMenuItem('Translate Options');
+        this.popupMenuExpander = new PopupMenu.PopupSubMenuMenuItem(SUBMENU_TITLE);
         let searchLayout = new St.BoxLayout({
             reactive: true,
             x_expand: true,
@@ -94,7 +98,7 @@ const TranslateIndicator = Lang.Class({
         });
         searchLayout.add(_searchLabel);
         searchLayout.add(this.searchEntry);
-        popupMenuExpander.menu.box.add(searchLayout);
+        this.popupMenuExpander.menu.box.add(searchLayout);
         //Save in schema doesnt work
         //searchEntry has to be a Gtk.Entry ...
         //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.searchEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
@@ -183,7 +187,7 @@ const TranslateIndicator = Lang.Class({
             this._on_key_press_event(object, event);
         });
 
-        this.menu.addMenuItem(popupMenuExpander);
+        this.menu.addMenuItem(this.popupMenuExpander);
         this.menu.addMenuItem(menuSection);
 
         this.menu.connect('open-state-changed', Lang.bind(this, function(self, open){
@@ -205,9 +209,10 @@ const TranslateIndicator = Lang.Class({
     },
 
     _onSearchTextChanged: function () {
-        TRANSLATE_OPTIONS = this.searchEntry.get_text();
-        //this._settings.set_string(Prefs.FIELDS.TRANSLATE_OPTIONS, TRANSLATE_OPTIONS);
-        writeRegistry(TRANSLATE_OPTIONS);
+        translate_options = this.searchEntry.get_text();
+        this.popupMenuExpander.label.set_text(this._getLanguagesOfTranslation() || SUBMENU_TITLE);
+        //this._settings.set_string(Prefs.FIELDS.TRANSLATE_OPTIONS, translate_options);
+        writeRegistry(translate_options);
         //this._onInputTextChanged();
     },
 
@@ -239,16 +244,30 @@ const TranslateIndicator = Lang.Class({
     },
 
     _validTranslateOptions () {
-        let b = TRANSLATE_OPTIONS.trim().length>0;
+        let b = translate_options.trim().length>0;
         if (!b)
             this._showNotification('No translation options given!');
         return b;
     },
 
+    _getLanguagesOfTranslation () {
+        let s = '';
+        const i = translate_options.indexOf(':');
+        if(i>=0){
+            if (i>1&&translate_options.charAt(i-1)!==' ')
+                s += Languages[translate_options.slice(i-2, i)].name || '';
+            else
+                s += 'Auto-Detection';
+            s += ' to ';
+            s += Languages[translate_options.slice(i+1, i+3)].name || '';
+        }
+        return s;
+    },
+
     async _translate (str) {
         let opt = (this._settings.get_boolean(Prefs.Fields.ENABLE_GLOBAL_TRANS))?[TRANS_CMD]:[TRANS_PATH+TRANS_CMD];
         if (this._validTranslateOptions())
-            opt = opt.concat(TRANSLATE_OPTIONS.trim().split(' '));
+            opt = opt.concat(translate_options.trim().split(' '));
         opt = opt.concat(str.trim());
         return this._exec(opt);
     },
@@ -353,13 +372,13 @@ const TranslateIndicator = Lang.Class({
 
     _fetchSettings: function (cb) {
         readRegistry((s) => {
-            TRANSLATE_OPTIONS = s?s:this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
-            this.searchEntry.set_text(TRANSLATE_OPTIONS);
+            translate_options = s?s:this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
+            this.searchEntry.set_text(translate_options);
             if (typeof cb === 'function')
                 cb(s);
         });
-        //TRANSLATE_OPTIONS = this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
-        //this.searchEntry.set_text(TRANSLATE_OPTIONS);
+        //translate_options = this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
+        //this.searchEntry.set_text(translate_options);
     },
 
     _bindShortcuts: function () {

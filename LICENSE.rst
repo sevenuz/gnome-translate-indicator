@@ -2,7 +2,7 @@
 The MIT License (MIT)
 ======================
 
-Copyright (c) 2014, Yotam Bar-On
+Copyright (c) 2020, Julius Athenstaedt
 -----------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
