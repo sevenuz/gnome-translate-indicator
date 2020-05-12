@@ -1,5 +1,6 @@
 const Clutter    = imports.gi.Clutter;
 const Gio        = imports.gi.Gio;
+const Gtk        = imports.gi.Gtk;
 const Lang       = imports.lang;
 const Mainloop   = imports.mainloop;
 const Meta       = imports.gi.Meta;
@@ -33,7 +34,12 @@ const Languages = Me.imports.languages.languages;
 const writeRegistry = Utils.writeRegistry;
 const readRegistry = Utils.readRegistry;
 
-let translate_options = ':en -b ';
+let translate_options = ':en';
+let notification_translate_options = ':en -b ';
+let enable_notification_translate_options = false;
+let enable_global_trans = false;
+let enable_selection = false;
+
 const TRANS_CMD = 'trans';
 const TRANS_PATH = Me.path + '/'; //'.local/share/gnome-shell/extensions/translate-indicator@athenstaedt.net/';
 const SUBMENU_TITLE = 'Translate Options';
@@ -99,9 +105,10 @@ const TranslateIndicator = Lang.Class({
         searchLayout.add(_searchLabel);
         searchLayout.add(this.searchEntry);
         this.popupMenuExpander.menu.box.add(searchLayout);
-        //Save in schema doesnt work
-        //searchEntry has to be a Gtk.Entry ...
-        //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.searchEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
+
+        //workaround: set text on searchEntry to save in settings
+        //this.gtkSearchEntry = new Gtk.Entry({ name: 'gtkSearchEntry' });
+        //this._settings.bind(Prefs.Fields.TRANSLATE_OPTIONS, this.gtkSearchEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
 
         let menuSection = new PopupMenu.PopupBaseMenuItem({
             reactive: false,
@@ -193,15 +200,18 @@ const TranslateIndicator = Lang.Class({
         this.menu.connect('open-state-changed', Lang.bind(this, function(self, open){
             let a = Mainloop.timeout_add(50, Lang.bind(this, () => {
                 if (open) {
-                    /*
-                    this._getFromClipboard(CLIPBOARD_TYPE, (cb, text)=>{
-                        this.inputEntry.set_text(text);
+                    if (enable_selection) {
+                        this._getFromClipboard(SELECTION_TYPE, (cb, text)=>{
+                            this.inputEntry.set_text(text);
+                            this.inputEntry.get_clutter_text().grab_key_focus();
+                            this._selectInputEntry();
+                            if (text !== '')
+                                this.outputEntry.set_text('');
+                        });
+                    } else {
+                        this.inputEntry.get_clutter_text().grab_key_focus();
                         this._selectInputEntry();
-                    });
-                    this.outputEntry.set_text('');
-                     */
-                    this.inputEntry.get_clutter_text().grab_key_focus();
-                    this._selectInputEntry();
+                    }
                 }
                 Mainloop.source_remove(a);
             }));
@@ -211,9 +221,8 @@ const TranslateIndicator = Lang.Class({
     _onSearchTextChanged: function () {
         translate_options = this.searchEntry.get_text();
         this.popupMenuExpander.label.set_text(this._getLanguagesOfTranslation() || SUBMENU_TITLE);
-        //this._settings.set_string(Prefs.FIELDS.TRANSLATE_OPTIONS, translate_options);
+        //this.gtkSearchEntry.text = translate_options;
         writeRegistry(translate_options);
-        //this._onInputTextChanged();
     },
 
     _onInputTextChanged: function () {},
@@ -225,7 +234,7 @@ const TranslateIndicator = Lang.Class({
 
         //65293 - Enter
         if (symbol === 65293) {
-            this._translate(this.inputEntry.get_text()).then((t, err)=>{
+            this._translate(translate_options, this.inputEntry.get_text()).then((t, err)=>{
                 this.outputEntry.get_clutter_text().set_markup(t);
                 //this.outputEntry.set_text(t);
             });
@@ -243,8 +252,8 @@ const TranslateIndicator = Lang.Class({
         });
     },
 
-    _validTranslateOptions () {
-        let b = translate_options.trim().length>0;
+    _validTranslateOptions (to) {
+        let b = to.trim().length>0;
         if (!b)
             this._showNotification('No translation options given!');
         return b;
@@ -264,10 +273,10 @@ const TranslateIndicator = Lang.Class({
         return s;
     },
 
-    async _translate (str) {
-        let opt = (this._settings.get_boolean(Prefs.Fields.ENABLE_GLOBAL_TRANS))?[TRANS_CMD]:[TRANS_PATH+TRANS_CMD];
-        if (this._validTranslateOptions())
-            opt = opt.concat(translate_options.trim().split(' '));
+    async _translate (to, str) {
+        let opt = (enable_global_trans)?[TRANS_CMD]:[TRANS_PATH+TRANS_CMD];
+        if (this._validTranslateOptions(to))
+            opt = opt.concat(to.trim().split(' '));
         opt = opt.concat(str.trim());
         return this._exec(opt);
     },
@@ -371,6 +380,11 @@ const TranslateIndicator = Lang.Class({
     },
 
     _fetchSettings: function (cb) {
+        enable_selection = this._settings.get_boolean(Prefs.Fields.ENABLE_SELECTION);
+        enable_global_trans = this._settings.get_boolean(Prefs.Fields.ENABLE_GLOBAL_TRANS);
+        enable_notification_translate_options = this._settings.get_boolean(Prefs.Fields.ENABLE_NOTIFICATION_TRANSLATE_OPTIONS);
+        notification_translate_options = this._settings.get_string(Prefs.Fields.NOTIFICATION_TRANSLATE_OPTIONS);
+
         readRegistry((s) => {
             translate_options = s?s:this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
             this.searchEntry.set_text(translate_options);
@@ -378,7 +392,6 @@ const TranslateIndicator = Lang.Class({
                 cb(s);
         });
         //translate_options = this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS);
-        //this.searchEntry.set_text(translate_options);
     },
 
     _bindShortcuts: function () {
@@ -388,13 +401,13 @@ const TranslateIndicator = Lang.Class({
     },
 
     _translateWithPopup: function () {
-        this._getFromClipboard(CLIPBOARD_TYPE, (cb, text)=>{
-            this._fetchSettings(() => {
-                if (this._validTranslateOptions())
-                    this._translate(text).then(str=>this._showNotification(str));
+        this._fetchSettings(()=>{
+            this._getFromClipboard((enable_selection)?SELECTION_TYPE:CLIPBOARD_TYPE, (cb, text)=>{
+                let to = (enable_notification_translate_options)?notification_translate_options:translate_options;
+                if (this._validTranslateOptions(to))
+                    this._translate(to, text).then(str=>this._showNotification(str));
             });
         });
-        //this._showNotification(this._settings.get_string(Prefs.Fields.TRANSLATE_OPTIONS));
     },
 
     _toggleMenu: function(){

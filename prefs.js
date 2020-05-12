@@ -10,9 +10,12 @@ const _ = Gettext.domain('translate-indicator').gettext;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.translate-indicator';
 
-var Fields = {
-    TRANSLATE_OPTIONS        : 'translate-options',
-    ENABLE_GLOBAL_TRANS      : 'enable-global-trans'
+const Fields = {
+    TRANSLATE_OPTIONS: 'translate-options',
+    ENABLE_SELECTION: 'enable-selection',
+    ENABLE_NOTIFICATION_TRANSLATE_OPTIONS: 'enable-notification-translate-options',
+    NOTIFICATION_TRANSLATE_OPTIONS: 'notification-translate-options',
+    ENABLE_GLOBAL_TRANS: 'enable-global-trans'
 };
 
 const getSchema = function () {
@@ -23,7 +26,7 @@ const getSchema = function () {
     return new Gio.Settings({ settings_schema: schema });
 };
 
-var SettingsSchema = getSchema();
+const SettingsSchema = getSchema();
 
 
 function init() {
@@ -48,6 +51,13 @@ const App = new Lang.Class({
         });
         this.translateOptionsEntry.text = SettingsSchema.get_string(Fields.TRANSLATE_OPTIONS);
         this.field_enable_global_trans = new Gtk.Switch();
+        this.field_enable_selection = new Gtk.Switch();
+
+        this.field_enable_notification_trans_opt = new Gtk.Switch();
+        this.notificationTranslateOptionsEntry = new Gtk.Entry({
+            name: 'notificationTranslateOptions',
+        });
+        this.notificationTranslateOptionsEntry.text = SettingsSchema.get_string(Fields.NOTIFICATION_TRANSLATE_OPTIONS);
 
         this.field_keybinding = createKeybindingWidget(SettingsSchema);
         addKeybinding(this.field_keybinding.model, SettingsSchema, "translate-with-notification",
@@ -60,8 +70,23 @@ const App = new Lang.Class({
             hexpand: true,
             halign: Gtk.Align.START
         });
+        let labelEnableNotificationTransOpt  = new Gtk.Label({
+            label: _('Enable "Notification translate options"'),
+            hexpand: true,
+            halign: Gtk.Align.START
+        });
+        let labelNotificationTranslateOptions  = new Gtk.Label({
+            label: _("Notification translate options"),
+            hexpand: true,
+            halign: Gtk.Align.START
+        });
         let labelEnableGlobalTrans  = new Gtk.Label({
             label: _("Enable global trans"),
+            hexpand: true,
+            halign: Gtk.Align.START
+        });
+        let labelEnableSelection  = new Gtk.Label({
+            label: _("Use selection instead of clipboard on notifications and menu (X.org only)"),
             hexpand: true,
             halign: Gtk.Align.START
         });
@@ -89,11 +114,17 @@ const App = new Lang.Class({
         })(this.main);
 
         addRow(labelTranslateOptions,   this.translateOptionsEntry);
+        addRow(labelEnableNotificationTransOpt,   this.field_enable_notification_trans_opt);
+        addRow(labelNotificationTranslateOptions,   this.notificationTranslateOptionsEntry);
         addRow(labelEnableGlobalTrans,   this.field_enable_global_trans);
+        addRow(labelEnableSelection,   this.field_enable_selection);
         addRow(null,                this.field_keybinding);
 
         SettingsSchema.bind(Fields.TRANSLATE_OPTIONS, this.translateOptionsEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
+        SettingsSchema.bind(Fields.ENABLE_NOTIFICATION_TRANSLATE_OPTIONS, this.field_enable_notification_trans_opt, 'active', Gio.SettingsBindFlags.DEFAULT);
+        SettingsSchema.bind(Fields.NOTIFICATION_TRANSLATE_OPTIONS, this.notificationTranslateOptionsEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
         SettingsSchema.bind(Fields.ENABLE_GLOBAL_TRANS, this.field_enable_global_trans, 'active', Gio.SettingsBindFlags.DEFAULT);
+        SettingsSchema.bind(Fields.ENABLE_SELECTION, this.field_enable_selection, 'active', Gio.SettingsBindFlags.DEFAULT);
 
         this.main.show_all();
     },

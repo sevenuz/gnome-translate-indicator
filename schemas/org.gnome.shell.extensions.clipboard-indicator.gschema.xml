@@ -9,13 +9,38 @@
         If true, a global trans installation is used, else a local version.
       </description>
     </key>
-    <key name="translate-options" type="s">
-      <default>':en -brief'</default>
-      <summary>Translate Option</summary>
+
+    <key name="enable-selection" type="b">
+      <default>false</default>
+      <summary>Use selection on X.org</summary>
       <description>
-          String which is the command to translate the string
+        Use current selection instead of clipboard on notifications and menu. Only on X.org (No Wayland-Support)
       </description>
     </key>
+
+    <key name="enable-notification-translate-options" type="b">
+      <default>false</default>
+      <summary>Enable the use of different parameters on notification translation</summary>
+      <description>
+        If true, it uses different Command-Parameters on notifications
+      </description>
+    </key>
+    <key name="notification-translate-options" type="s">
+      <default>':en -b'</default>
+      <summary>Translate Option</summary>
+      <description>
+        Command-Parameter to translate the string on notifications
+      </description>
+    </key>
+
+    <key name="translate-options" type="s">
+      <default>':en'</default>
+      <summary>Translate Option</summary>
+      <description>
+          Command-Parameter to translate the string
+      </description>
+    </key>
+
     <key name="translate-with-notification" type="as">
       <default><![CDATA[['<Super><Alt>T']]]></default>
       <summary>Translate with Notification</summary>
