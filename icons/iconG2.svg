@@ -3,10 +3,10 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="160px" height="160px" viewBox="0 0 160 160" xml:space="preserve">
-<g id="Ebene_8">
-	<circle fill="none" stroke="#FFFFFF" stroke-width="20" stroke-miterlimit="10" cx="95" cy="65" r="55"/>
-	<line fill="none" stroke="#FFFFFF" stroke-width="20" stroke-miterlimit="10" x1="10" y1="150" x2="60" y2="100"/>
-	<polyline fill="none" stroke="#FFFFFF" stroke-width="20" stroke-miterlimit="10" points="68.02,40.855 107.928,46.397 
-		84.667,84.167 127.667,80.667 	"/>
+<g id="Ebene_6">
+	<path fill="none" stroke="#FFFFFF" stroke-width="20" stroke-miterlimit="10" d="M80,28.242c0,0-25.2-17.232-70-17.858v119.373
+		c44.8,0.626,70,17.859,70,17.859s25.2-17.233,70-17.859V10.384C105.2,11.01,80,28.242,80,28.242z"/>
+	<polyline fill="none" stroke="#FFFFFF" stroke-width="20" stroke-miterlimit="10" points="40.667,53 106,59 55.667,102 117.75,98 	
+		"/>
 </g>
 </svg>
