@@ -102,9 +102,9 @@ const TranslateIndicator = Lang.Class({
             hint_text: _('Your translation parameter (-h for help)'),
             track_hover: true
         });
-        searchLayout.add(_searchLabel);
-        searchLayout.add(this.searchEntry);
-        this.popupMenuExpander.menu.box.add(searchLayout);
+        searchLayout.add_child(_searchLabel);
+        searchLayout.add_child(this.searchEntry);
+        this.popupMenuExpander.menu.box.add_child(searchLayout);
 
         //workaround: set text on searchEntry to save in settings
         //this.gtkSearchEntry = new Gtk.Entry({ name: 'gtkSearchEntry' });
@@ -124,12 +124,12 @@ const TranslateIndicator = Lang.Class({
             y_align: St.Align.MIDDLE,
             vertical: true
         });
-        actor.add(scrollI, {
+        actor.add_child(scrollI, {
             x_fill: true,
             y_fill: true,
             expand: true
         });
-        actor.add(scrollO, {
+        actor.add_child(scrollO, {
             x_fill: true,
             y_fill: true,
             expand: true
@@ -162,7 +162,7 @@ const TranslateIndicator = Lang.Class({
         let _boxI = new St.BoxLayout({
             vertical: true,
         });
-        _boxI.add(this.inputEntry, {
+        _boxI.add_child(this.inputEntry, {
             y_align: St.Align.START,
             y_fill: true,
             x_fill: true,
@@ -170,7 +170,7 @@ const TranslateIndicator = Lang.Class({
         let _boxO = new St.BoxLayout({
             vertical: true,
         });
-        _boxO.add(this.outputEntry, {
+        _boxO.add_child(this.outputEntry, {
             y_align: St.Align.START,
             y_fill: true,
             x_fill: true,
