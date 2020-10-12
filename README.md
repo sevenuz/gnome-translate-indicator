@@ -1,5 +1,9 @@
 # gnome-translate-indicator
 
+Translate extension for Gnome-Shell - 
+based on translate-shell,
+ inspired by Tudmotu's clipboard-indicator and gufoe's text-translator
+
 A simple translation tool for the GNOME desktop.
 It can be installed over
 https://extensions.gnome.org/extension/3318/translate-indicator/
