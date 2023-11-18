@@ -3,10 +3,10 @@
   "description": "Translate extension for Gnome-Shell - based on translate-shell, inspired by Tudmotu's clipboard-indicator and gufoe's text-translator",
   "name": "Translate Indicator",
   "shell-version": [
-    "3.36",
-    "3.38"
+    "45"
   ],
   "url": "https://github.com/sevenuz/gnome-translate-indicator",
   "uuid": "translate-indicator@athenstaedt.net",
-  "version": 3
+  "version": 4,
+	"settings-schema": "org.gnome.shell.extensions.translate-indicator"
 }

@@ -1,4 +1,4 @@
-const languages = {
+export const languages = {
   "aa": {
     "name": "Afar",
     "native": "Afar"
