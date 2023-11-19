@@ -1,7 +1,7 @@
 # gnome-translate-indicator
 
 Translate extension for Gnome-Shell - 
-based on (https://github.com/soimort/translate-shell)[translate-shell],
+based on [translate-shell](https://github.com/soimort/translate-shell),
 
 Menu to translate everthing on your desktop.
 
@@ -44,5 +44,5 @@ Enable it from terminal by running the following command:
 
 # Acknowledgments
 
-Heavily inspired by (https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator)[Tudmotu's clipboard-indicator] 
-and (https://github.com/gufoe/text-translator)[gufoe's text-translator]
+Heavily inspired by [Tudmotu's clipboard-indicator](https://github.com/Tudmotu/gnome-shell-extension-clipboard-indicator) 
+and [gufoe's text-translator](https://github.com/gufoe/text-translator)
