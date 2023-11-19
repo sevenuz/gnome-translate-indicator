@@ -1,4 +1,5 @@
 import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gio from 'gi://Gio';
 import Meta from 'gi://Meta';
@@ -30,7 +31,7 @@ let enable_global_trans = false;
 let enable_selection = false;
 
 const TRANS_CMD = 'trans';
-const TRANS_PATH = '/home/jul/git/gnome-translate-indicator/';
+const TRANS_PATH = GLib.get_home_dir() + '/.local/share/gnome-shell/extensions/translate-indicator@athenstaedt.net/';
 const SUBMENU_TITLE = 'Translate Options';
 
 export default class TranslateIndicatorExtension extends Extension {
@@ -55,11 +56,6 @@ const TranslateIndicator = GObject.registerClass({
 	GTypeName: 'TranslateIndicator'
 }, class TranslateIndicator extends PanelMenu.Button {
 	_settingsChangedId = null;
-	_translateTimeoutId = null;
-	_selectionOwnerChangedId = null;
-	_historyLabelTimeoutId = null;
-	_historyLabel = null;
-	_buttonText = null;
 
 	destroy() {
 		this._disconnectSettings();
@@ -79,15 +75,16 @@ const TranslateIndicator = GObject.registerClass({
 		this.icon = new St.Icon({
 			style_class: 'system-status-icon'
 		});
-		this.icon.gicon = Gio.icon_new_for_string(`${TRANS_PATH}/icons/icon.svg`);
+		this.icon.gicon = Gio.icon_new_for_string(`${TRANS_PATH}icons/icon.svg`);
 		hbox.add_child(this.icon);
 
-		//hbox.add(PopupMenu.arrowIcon(St.Side.BOTTOM));
 		this.actor.add_child(hbox);
 
 		this._loadSettings();
 		this._buildMenu();
 		this._fetchSettings();
+
+		this.searchEntry.set_text(translate_options);
 	}
 
 	_buildMenu() {
@@ -368,7 +365,7 @@ const TranslateIndicator = GObject.registerClass({
 		}
 
 		notification.setTransient(true);
-		this._notifSource.notify(notification);
+		this._notifSource.showNotification(notification);
 	}
 
 	_loadSettings() {
@@ -387,6 +384,9 @@ const TranslateIndicator = GObject.registerClass({
 		enable_notification_translate_options = settings.get_boolean(Fields.ENABLE_NOTIFICATION_TRANSLATE_OPTIONS);
 		notification_translate_options = settings.get_string(Fields.NOTIFICATION_TRANSLATE_OPTIONS);
 		translate_options = settings.get_string(Fields.TRANSLATE_OPTIONS);
+
+		if (typeof cb === 'function')
+			cb();
 	}
 
 	_bindShortcuts() {
