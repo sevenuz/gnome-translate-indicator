@@ -1,13 +1,12 @@
 # gnome-translate-indicator
 
-Translate extension for Gnome-Shell - 
+[Translate extension for Gnome-Shell](https://extensions.gnome.org/extension/3318/translate-indicator/) - 
 based on [translate-shell](https://github.com/soimort/translate-shell),
 
-Menu to translate everthing on your desktop.
+Menu to translate everything on your desktop.
 
 `<Super> + T` to toggle menu.
-
-`<Cntl> + <Cntl> + T` to use notification translation.
+`<Cntl> + <Alt> + T` to use notification translation.
 
 Shortcuts can be changed in the settings.
 
@@ -16,12 +15,8 @@ This can be enabled in the settings.
 This is not supported on wayland.
 There, you have to copy the clipboard for translation.
 
-A simple translation tool for the GNOME desktop.
-It can be installed over
-https://extensions.gnome.org/extension/3318/translate-indicator/
-
-By default, this extension uses the included translate-shell version,
-which is probalbly not the newest. You can change this in the settings.
+By default, this extension uses the included translate-shell version, 
+which is probably not the newest. You can change this in the settings.
 
 If you use the the included trans file, make sure that it is executable.
 You find the source of the extension usually here: 
