@@ -14,14 +14,16 @@ import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import { languages as Languages } from './languages.js';
-import { Fields, SCHEMA_NAME } from './util.js';
+import {
+	Fields,
+	SCHEMA_NAME,
+	SETTING_KEY_TRANSLATE_MENU,
+	SETTING_KEY_TRANSLATE_NOTIFICATION
+} from './schema.js';
 
-const Clipboard = St.Clipboard.get_default();
 const CLIPBOARD_TYPE = St.ClipboardType.CLIPBOARD;
 const SELECTION_TYPE = St.ClipboardType.PRIMARY;
 
-const SETTING_KEY_TRANSLATE_NOTIFICATION = "translate-with-notification";
-const SETTING_KEY_TRANSLATE_MENU = "translate-from-selection";
 const INDICATOR_ICON = 'insert-text-symbolic';
 
 let translate_options = ':en';
@@ -39,8 +41,6 @@ export default class TranslateIndicatorExtension extends Extension {
 		this.translateIndicator = new TranslateIndicator({
 			clipboard: St.Clipboard.get_default(),
 			settings: this.getSettings(SCHEMA_NAME),
-			openSettings: this.openPreferences,
-			uuid: this.uuid
 		});
 
 		Main.panel.addToStatusArea(this.uuid, this.translateIndicator, 1);
@@ -55,11 +55,17 @@ export default class TranslateIndicatorExtension extends Extension {
 const TranslateIndicator = GObject.registerClass({
 	GTypeName: 'TranslateIndicator'
 }, class TranslateIndicator extends PanelMenu.Button {
-	_settingsChangedId = null;
-
 	destroy() {
 		this._disconnectSettings();
 		this._unbindShortcuts();
+
+		this.extension.settings = null;
+		this.extension.clipboard = null;
+
+		if (this._timeoutId) {
+			clearTimeout(this._timeoutId);
+			this._timeoutId = null;
+		}
 
 		// Call parent
 		super.destroy()
@@ -68,7 +74,8 @@ const TranslateIndicator = GObject.registerClass({
 	_init(extension) {
 		super._init(0.0, "TranslateIndicator");
 		this.extension = extension;
-		this._settings = extension.settings;
+
+		this._settingsChangedId = null;
 		this._shortcutsBindingIds = [];
 
 		let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box translate-indicator-hbox' });
@@ -110,10 +117,6 @@ const TranslateIndicator = GObject.registerClass({
 		searchLayout.add_child(this.searchEntry);
 		this.popupMenuExpander.menu.box.add_child(searchLayout);
 
-		//workaround: set text on searchEntry to save in settings
-		//this.gtkSearchEntry = new Gtk.Entry({ name: 'gtkSearchEntry' });
-		//this._settings.bind(Fields.TRANSLATE_OPTIONS, this.gtkSearchEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-
 		let menuSection = new PopupMenu.PopupBaseMenuItem({
 			reactive: false,
 			can_focus: false
@@ -135,7 +138,8 @@ const TranslateIndicator = GObject.registerClass({
 			x_fill: true,
 			y_fill: true,
 			expand: true
-		});//Translate Input
+		});
+		//Translate Input
 		this.inputEntry = new St.Entry({
 			name: 'inputEntry',
 			style_class: 'entry',
@@ -198,20 +202,17 @@ const TranslateIndicator = GObject.registerClass({
 		this.menu.addMenuItem(menuSection);
 
 		that.menu.connect('open-state-changed', (self, open) => {
-			setTimeout(() => {
+			this._timeoutId = setTimeout(() => {
 				if (open) {
 					if (enable_selection) {
-						this._getFromClipboard(SELECTION_TYPE, (cb, text) => {
+						this._getFromClipboard(SELECTION_TYPE, (_cb, text) => {
 							this.inputEntry.set_text(text);
-							this.inputEntry.get_clutter_text().grab_key_focus();
-							this._selectInputEntry();
 							if (text !== '')
 								this.outputEntry.set_text('');
 						});
-					} else {
-						this.inputEntry.get_clutter_text().grab_key_focus();
-						this._selectInputEntry();
 					}
+					this.inputEntry.get_clutter_text().grab_key_focus();
+					this._selectInputEntry();
 				}
 			}, 50);
 		});
@@ -224,14 +225,14 @@ const TranslateIndicator = GObject.registerClass({
 
 	_onInputTextChanged() { }
 
-	_on_key_press_event(object, event) {
+	_on_key_press_event(_object, event) {
 		let symbol = event.get_key_symbol();
 		//let code = event.get_key_code();
 		//let state = event.get_state();
 
 		//65293 - Enter
 		if (symbol === 65293) {
-			this._translate(translate_options, this.inputEntry.get_text()).then((t, err) => {
+			this._translate(translate_options, this.inputEntry.get_text()).then((t, _err) => {
 				this.outputEntry.get_clutter_text().set_markup(t);
 				//this.outputEntry.set_text(t);
 			});
@@ -242,11 +243,9 @@ const TranslateIndicator = GObject.registerClass({
 		this.inputEntry.get_clutter_text().set_selection(0, this.inputEntry.get_text().length);
 	}
 
+	// cb gets clipBoard, text as arguments
 	_getFromClipboard(type, cb) {
-		//Clipboard.set_text(CLIPBOARD_TYPE, "");
-		Clipboard.get_text(type, function(clipBoard, text) {
-			cb(clipBoard, text);
-		});
+		this.extension.clipboard.get_text(type, cb);
 	}
 
 	_validTranslateOptions(to) {
@@ -290,7 +289,7 @@ const TranslateIndicator = GObject.registerClass({
 			return await new Promise((resolve, reject) => {
 				proc.communicate_utf8_async(null, null, (proc, res) => {
 					try {
-						let [ok, stdout, stderr] = proc.communicate_utf8_finish(res);
+						let [_ok, stdout, _stderr] = proc.communicate_utf8_finish(res);
 						resolve(this._escape_translation(stdout));
 					} catch (error) {
 						reject(error);
@@ -397,7 +396,7 @@ const TranslateIndicator = GObject.registerClass({
 
 	_translateWithPopup() {
 		this._fetchSettings(() => {
-			this._getFromClipboard((enable_selection) ? SELECTION_TYPE : CLIPBOARD_TYPE, (cb, text) => {
+			this._getFromClipboard((enable_selection) ? SELECTION_TYPE : CLIPBOARD_TYPE, (_cb, text) => {
 				let to = (enable_notification_translate_options) ? notification_translate_options : translate_options;
 				if (this._validTranslateOptions(to))
 					this._translate(to, text).then(str => this._showNotification(str));
@@ -423,7 +422,7 @@ const TranslateIndicator = GObject.registerClass({
 
 		Main.wm.addKeybinding(
 			name,
-			this._settings,
+			this.extension.settings,
 			Meta.KeyBindingFlags.NONE,
 			ModeType.ALL,
 			cb.bind(this)
@@ -436,7 +435,7 @@ const TranslateIndicator = GObject.registerClass({
 		if (!this._settingsChangedId)
 			return;
 
-		this._settings.disconnect(this._settingsChangedId);
+		this.extension.settings.disconnect(this._settingsChangedId);
 		this._settingsChangedId = null;
 	}
 });

@@ -1,10 +1,9 @@
-import GObject from 'gi://GObject';
 import Adw from 'gi://Adw';
 import Gtk from 'gi://Gtk';
 import Gio from 'gi://Gio';
 import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-import { Fields, SCHEMA_NAME } from './util.js';
+import { Fields, SCHEMA_NAME } from './schema.js';
 
 export default class TranslateIndicatorPreferences extends ExtensionPreferences {
 	fillPreferencesWindow(window) {
@@ -27,21 +26,21 @@ class Settings {
 		});
 		this.translateOptionsEntry.text = this.schema.get_string(Fields.TRANSLATE_OPTIONS);
 		this.field_enable_global_trans = new Adw.SwitchRow({
-			title: _("Enable global trans")
+			title: _("Enable global trans (translate-shell)")
 		});
 		this.field_enable_selection = new Adw.SwitchRow({
-			title: _("Use selection instead of clipboard on notifications and menu (X.org only)")
+			title: _("Use selection instead of clipboard content for translation (X.org only)")
 		});
 
 		this.field_enable_notification_trans_opt = new Adw.SwitchRow({
-			title: _('Enable "Notification translate options"')
+			title: _('Enable separate translate options for Notifications')
 		});
 		this.notificationTranslateOptionsEntry = new Adw.EntryRow({
 			title: _("Notification translate options")
 		});
 		this.notificationTranslateOptionsEntry.text = this.schema.get_string(Fields.NOTIFICATION_TRANSLATE_OPTIONS);
 
-		this.ui = new Adw.PreferencesGroup({ title: _('UI') });
+		this.ui = new Adw.PreferencesGroup({ title: _('General') });
 		this.ui.add(this.translateOptionsEntry);
 		this.ui.add(this.field_enable_global_trans);
 		this.ui.add(this.field_enable_selection);
