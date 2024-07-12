@@ -179,9 +179,9 @@ const TranslateIndicator = GObject.registerClass({
 			y_fill: true,
 			x_fill: true,
 		});
-		scrollI.add_actor(_boxI);
-		scrollO.add_actor(_boxO);
-		menuSection.actor.add_actor(actor, { expand: true });
+		scrollI.add_child(_boxI);
+		scrollO.add_child(_boxO);
+		menuSection.actor.add_child(actor, { expand: true });
 
 		that.searchEntry.get_clutter_text().connect(
 			'text-changed',
